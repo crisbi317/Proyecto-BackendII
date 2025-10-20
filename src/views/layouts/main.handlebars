@@ -7,6 +7,21 @@
         <link rel="stylesheet" href="/css/{{style}}">
     </head>
     <body>
+          <nav>
+      {{#if user}}
+        <span>Hola, {{user.first_name}}</span>
+        <a href="/profile">Perfil</a>
+
+        {{#if (eq user.role "admin")}}
+          <a href="/admin">Panel Admin</a>
+        {{/if}}
+
+        <a href="/logout">Salir</a>
+      {{else}}
+        <a href="/login">Login</a>
+        <a href="/register">Registro</a>
+      {{/if}}
+    </nav>
 
         {{{body}}}
 

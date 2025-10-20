@@ -19,8 +19,14 @@ mongoose.connect(uri);
 
 dotenv.config();
 
+const hbs= handlebars.create({
+    helpers: {
+        eq:(a,b) => a===b
+    }
+});
+
 //Handlebars Config
-app.engine('handlebars', handlebars.engine());
+app.engine('handlebars', hbs.engine());
 app.set('views', __dirname + '/../views');
 app.set('view engine', 'handlebars');
 

@@ -1,8 +1,9 @@
 import User from '../dao/models/User.js';
-import bcrypt from 'bcrypt';
+import { comparePassword } from '../utils/passwordUtil.js';
 import jwt from 'jsonwebtoken';
 
 const SECRET_KEY = process.env.JWT_SECRET;
+
 
 export const loginUser = async (req, res) => {
   try {
@@ -11,7 +12,7 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ error: 'Usuario no encontrado' });
 
-    const isValid = bcrypt.compareSync(password, user.password);
+    const isValid = comparePassword(password, user.password);
     if (!isValid) return res.status(401).json({ error: 'Contraseña incorrecta' });
 
     const token = jwt.sign({ user: {
@@ -20,10 +21,14 @@ export const loginUser = async (req, res) => {
       role: user.role,
       first_name: user.first_name,
       last_name: user.last_name
-    }}, SECRET_KEY, { expiresIn: '1h' });
+    }}, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ message: 'Login exitoso', token });
+    res.cookie('jwt',token,{ httpOnly:true}).redirect('/profile');
   } catch (error) {
-    res.status(500).json({ error: 'Error en el login' });
+    res.status(500).render('login',{ error: 'Error en el login' });
   }
+};
+
+export const getCurrentUser = (req, res) => {
+  res.json({ user: req.user });
 };
