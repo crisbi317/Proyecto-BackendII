@@ -3,7 +3,7 @@ import handlebars from 'express-handlebars';
 import {Server} from 'socket.io';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import sessionsRouter from './routers/sessionsRouter.js';
+import sessionsRouter from './routes/sessionsRouter.js';
 import productRouter from './routes/productRouter.js';
 import cartRouter from './routes/cartRouter.js';
 import viewsRouter from './routes/viewsRouter.js';

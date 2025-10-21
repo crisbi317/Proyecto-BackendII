@@ -4,6 +4,18 @@ import jwt from 'jsonwebtoken';
 
 const SECRET_KEY = process.env.JWT_SECRET;
 
+export const registerUser = async (req, res) => {
+  try {
+    const { first_name, last_name, email, password } = req.body;
+
+    const newUser = new User({ first_name, last_name, email, password });
+    await newUser.save();
+
+    res.status(201).json({ message: 'Usuario registrado exitosamente' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error en el registro' });
+  }
+};
 
 export const loginUser = async (req, res) => {
   try {
@@ -21,7 +33,7 @@ export const loginUser = async (req, res) => {
       role: user.role,
       first_name: user.first_name,
       last_name: user.last_name
-    }}, process.env.JWT_SECRET, { expiresIn: '1h' });
+    }}, SECRET_KEY, { expiresIn: '1h' });
 
     res.cookie('jwt',token,{ httpOnly:true}).redirect('/profile');
   } catch (error) {
