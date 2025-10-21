@@ -1,8 +1,9 @@
 import express from 'express';
-import handlebars from 'express-handlebars';
+import { create } from 'express-handlebars';
 import {Server} from 'socket.io';
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+
 import sessionsRouter from './routes/sessionsRouter.js';
 import productRouter from './routes/productRouter.js';
 import cartRouter from './routes/cartRouter.js';
@@ -14,19 +15,21 @@ import cookieParser from 'cookie-parser';
 
 const app = express();
 
+dotenv.config();
+
 const uri = process.env.MONGO_URI;
 mongoose.connect(uri);
 
-dotenv.config();
 
-const hbs= handlebars.create({
+
+const hbs= create({
     helpers: {
         eq:(a,b) => a===b
     }
 });
 
-//Handlebars Config
-app.engine('handlebars', hbs.engine());
+//Handlebars
+app.engine('handlebars', hbs.engine);
 app.set('views', __dirname + '/../views');
 app.set('view engine', 'handlebars');
 
