@@ -1,7 +1,11 @@
+// Obtener cartId del elemento HTML (si el usuario está autenticado)
+const userCartId = document.querySelector('#user-cart-id')?.value;
+
 showButtonCart();
 
 async function addToCart(pid) {
-    let cartId = localStorage.getItem('cartId');
+    // Priorizar el carrito del usuario autenticado
+    let cartId = userCartId || localStorage.getItem('cartId');
 
     if (!cartId) {
         const createCartResponse = await fetch('/api/carts', {
@@ -17,7 +21,10 @@ async function addToCart(pid) {
         console.log(createCart);
 
         cartId = createCart.payload._id;
-        localStorage.setItem('cartId', cartId)
+        // Solo guardar en localStorage si no es usuario autenticado
+        if (!userCartId) {
+            localStorage.setItem('cartId', cartId);
+        }
     }
 
     const addProductResponse = await fetch(`/api/carts/${cartId}/product/${pid}`, {
@@ -36,7 +43,8 @@ async function addToCart(pid) {
 }
 
 function showButtonCart() {
-    cartId = localStorage.getItem('cartId');
+    // Priorizar el carrito del usuario autenticado
+    const cartId = userCartId || localStorage.getItem('cartId');
 
     if (cartId) {
         document.querySelector('#button-cart').setAttribute("href", `/cart/${cartId}`);

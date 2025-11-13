@@ -1,3 +1,7 @@
+import {router} from 'express';
+import User from '../dao/models/userModel.js';
+import { hashPassword } from '../utils/passwordUtil.js';
+
 router.get('/', async (req, res) => {
   const users = await User.find();
   res.json(users);

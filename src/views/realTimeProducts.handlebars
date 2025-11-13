@@ -41,6 +41,39 @@
         {{/each}}
     </div>
 </div>
+<style>
+    .products-form {
+        margin-bottom: 20px;
+    }
 
+    .products-form form {
+        display: flex;
+        flex-direction: column;
+        width: 300px;
+    }
+
+    .products-form label {
+        margin-top: 10px;
+    }
+
+    .products-form input {
+        padding: 8px;
+        font-size: 16px;
+    }
+
+    .products-form button {
+        margin-top: 15px;
+        padding: 10px;
+        font-size: 16px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    .products-form button:hover {
+        background-color: #45a049;
+    }
+</style>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/index.js"></script>

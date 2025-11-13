@@ -1,0 +1,118 @@
+<div class="auth-container">
+  <h2>Restablecer Contraseña</h2>
+  
+  <form id="formularioReset">
+    <div class="formulario">
+      <label for="newPassword">Nueva Contraseña:</label>
+      <input type="password" id="newPassword" name="newPassword" required minlength="6" />
+    </div>
+
+    <div class="formulario">
+      <label for="confirmPassword">Confirmar Contraseña:</label>
+      <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6" />
+    </div>
+
+    <button type="submit">Restablecer Contraseña</button>
+  </form>
+
+  <div id="mensaje"></div>
+
+  <p><a href="/login">Volver al login</a></p>
+</div>
+
+<style>
+  .auth-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+  }
+  .formulario {
+    margin-bottom: 15px;
+  }
+  .formulario label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  .formulario input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  button:hover {
+    background-color: #0056b3;
+  }
+  #mensaje {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 4px;
+  }
+  .exito {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  .error {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+</style>
+
+<script>
+  // Obtener token de la URL
+  const pathParts = window.location.pathname.split('/');
+  const token = pathParts[pathParts.length - 1];
+
+  document.getElementById('formularioReset').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const mensajeDiv = document.getElementById('mensaje');
+    
+    // Validar que las contraseñas coincidan
+    if (newPassword !== confirmPassword) {
+      mensajeDiv.className = 'error';
+      mensajeDiv.textContent = 'Las contraseñas no coinciden';
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/sessions/reset-password/${token}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ newPassword })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        mensajeDiv.className = 'exito';
+        mensajeDiv.textContent = data.mensaje + '. Redirigiendo al login...';
+        
+        // Redirigir al login después de 2 segundos
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+      } else {
+        mensajeDiv.className = 'error';
+        mensajeDiv.textContent = data.mensaje;
+      }
+    } catch (error) {
+      mensajeDiv.className = 'error';
+      mensajeDiv.textContent = 'Error al procesar la solicitud';
+    }
+  });
+</script>
