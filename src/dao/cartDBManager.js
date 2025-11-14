@@ -1,4 +1,5 @@
 import { cartModel } from "./models/cartModel.js";
+import productModel from "./models/productModel.js";
 
 class cartDBManager {
 

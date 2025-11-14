@@ -12,10 +12,11 @@
           <hr>
           <p><strong>Categoría:</strong> {{this.product.category}}</p>
           <p><strong>Precio unitario:</strong> ${{this.product.price}}</p>
-          <p><strong>Cantidad:</strong> {{this.quantity}}</p>
+          <p><strong>Stock disponible:</strong> {{this.product.stock}}</p>
+          <p><strong>Cantidad en carrito:</strong> {{this.quantity}}</p>
           <p><strong>Subtotal:</strong> ${{multiply this.product.price this.quantity}}</p>
           <button class="button-delete" onclick="removeFromCart('{{this.product._id}}')">
-            Eliminar
+            🗑️ Eliminar
           </button>
         </div>
       {{/each}}
@@ -84,14 +85,24 @@
     background-color: #dc3545;
     color: white;
     border: none;
-    padding: 8px 16px;
+    padding: 10px 20px;
     border-radius: 4px;
     cursor: pointer;
     margin-top: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    width: 100%;
   }
 
   .button-delete:hover {
     background-color: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+  }
+
+  .button-delete:active {
+    transform: translateY(0);
   }
 
   .cart-summary {
@@ -237,6 +248,10 @@
   }
 
   async function removeFromCart(productId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este producto del carrito?')) {
+      return;
+    }
+
     try {
       const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
         method: 'DELETE'
@@ -245,13 +260,19 @@
       const data = await response.json();
 
       if (data.status === 'success') {
-        location.reload();
+        // Mostrar mensaje de éxito antes de recargar
+        showModal('Producto Eliminado', '<p class="success-message">El producto ha sido eliminado del carrito exitosamente.</p>');
+        
+        // Recargar después de 1 segundo
+        setTimeout(() => {
+          location.reload();
+        }, 1000);
       } else {
-        alert('Error al eliminar producto: ' + data.message);
+        showModal('Error', `<p class="error-message">Error al eliminar producto: ${data.message}</p>`);
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al eliminar producto');
+      showModal('Error', '<p class="error-message">Error al eliminar producto. Por favor intenta nuevamente.</p>');
     }
   }
 
@@ -296,9 +317,10 @@
       if (data.status === 'success') {
         showModal('¡Compra Exitosa! 🎉', createSuccessHTML(data));
         
-          setTimeout(() => {
-          location.reload();
-        }, 3000);
+        // Redirigir al ticket después de 2 segundos
+        setTimeout(() => {
+          window.location.href = `/ticket/${data.ticket.code}`;
+        }, 2000);
       } else {
         showModal('Error en la Compra', createErrorHTML(data));
         button.disabled = false;

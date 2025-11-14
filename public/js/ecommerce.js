@@ -34,12 +34,18 @@ async function addToCart(pid) {
     const addProduct = await addProductResponse.json();
 
     if (addProduct.status === 'error') {
-        return alert(addProduct.message);
+        // Mostrar mensaje de error más claro para problemas de stock
+        if (addProduct.message.includes('stock')) {
+            alert('⚠️ ' + addProduct.message);
+        } else {
+            alert('Error: ' + addProduct.message);
+        }
+        return;
     }
 
     showButtonCart();
 
-    alert('Producto añadido satisfactoriamente!');
+    alert('✓ Producto añadido satisfactoriamente!');
 }
 
 function showButtonCart() {

@@ -78,10 +78,11 @@ export const forgotPassword = async (req, res) => {
     // Crear token único
     const resetToken = crypto.randomBytes(32).toString('hex');
     
-    // Guardar token 
+    // Guardar token con email y expiración de 1 hora
     await PasswordResetToken.create({
-      userId: user._id,
-      token: resetToken
+      email: email,
+      token: resetToken,
+      expiresAt: new Date(Date.now() + 3600000) // 1 hora
     });
 
     // Enviar email recuperación
@@ -106,17 +107,35 @@ export const resetPassword = async (req, res) => {
     const { token } = req.params;
     const { newPassword } = req.body;
 
-    // Validar token existente
-    const resetToken = await PasswordResetToken.findOne({ token });
+    // Validar token existente y no usado
+    const resetToken = await PasswordResetToken.findOne({ 
+      token,
+      used: false
+    });
+    
     if (!resetToken) {
       return res.status(400).json({ 
         status: 'error',
-        message: 'Token inválido o expirado' 
+        message: 'Token inválido o ya fue utilizado' 
       });
     }
 
-    // Obtener usuario
-    const user = await UserRepository.getById(resetToken.userId);
+    // Validar que no haya expirado
+    if (new Date() > resetToken.expiresAt) {
+      return res.status(400).json({ 
+        status: 'error',
+        message: 'El token ha expirado. Solicita un nuevo enlace de recuperación' 
+      });
+    }
+
+    // Obtener usuario por email
+    const user = await UserRepository.getByEmail(resetToken.email);
+    if (!user) {
+      return res.status(404).json({ 
+        status: 'error',
+        message: 'Usuario no encontrado' 
+      });
+    }
     
     // Validar nueva contraseña diferente
     const isSamePassword = comparePassword(newPassword, user.password);
@@ -131,8 +150,9 @@ export const resetPassword = async (req, res) => {
     const hashedPassword = hashPassword(newPassword);
     await UserRepository.updatePassword(user._id, hashedPassword);
 
-    // Eliminar token usado
-    await PasswordResetToken.deleteOne({ _id: resetToken._id });
+    // Marcar token como usado
+    resetToken.used = true;
+    await resetToken.save();
 
     res.json({ 
       status: 'success',

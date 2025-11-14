@@ -61,6 +61,33 @@ class ProductRepository {
       throw error;
     }
   }
+
+  async updateStock(productId, quantityToSubtract) {
+    try {
+      const product = await this.productManager.getProductByID(productId);
+      
+      if (!product) {
+        throw new Error(`Producto ${productId} no encontrado`);
+      }
+
+      const newStock = product.stock - quantityToSubtract;
+      
+      if (newStock < 0) {
+        throw new Error(`Stock insuficiente para el producto ${product.title}`);
+      }
+
+      await this.productManager.updateProduct(productId, { stock: newStock });
+      
+      return { 
+        productId, 
+        previousStock: product.stock, 
+        newStock,
+        quantitySubtracted: quantityToSubtract
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default new ProductRepository();

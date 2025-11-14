@@ -6,6 +6,7 @@ import { requireAdmin } from '../middleware/autorize.js';
 
 const router = Router();
 
+// Middleware para autenticación en vistas
 const requireAuth = (req, res, next) => {
   passport.authenticate('current', { session: false }, (err, user, info) => {
     if (err) {
@@ -17,6 +18,22 @@ const requireAuth = (req, res, next) => {
     req.user = user;
     next();
   })(req, res, next);
+};
+
+// Middleware para verificar que es admin en vistas
+const requireAdminView = (req, res, next) => {
+  if (!req.user) {
+    return res.redirect('/login');
+  }
+  
+  if (req.user.role !== 'admin') {
+    return res.status(403).render('error', { 
+      error: 'Acceso denegado: solo administradores',
+      user: req.user 
+    });
+  }
+  
+  next();
 };
 
 //autenticacion
@@ -41,7 +58,7 @@ router.get('/profile', requireAuth, (req, res) => {
   res.render('profile', { user: req.user });
 }); 
 
-router.get('/admin', requireAuth, requireAdmin, (req, res) => {
+router.get('/admin', requireAuth, requireAdminView, (req, res) => {
   res.render('admin', { user: req.user });
 });
 
@@ -78,7 +95,7 @@ router.get('/products', (req, res, next) => {
   })(req, res, next);
 });
 
-router.get('/realtimeproducts', requireAuth, requireAdmin, async (req, res) => {
+router.get('/realtimeproducts', requireAuth, requireAdminView, async (req, res) => {
   try {
     const products = await ProductRepository.getAll(req.query);
     res.render('realTimeProducts', {
@@ -114,6 +131,41 @@ router.get('/cart/:cid', requireAuth, async (req, res) => {
     res.status(404).render('notFound', {
       title: 'Not Found',
       style: 'index.css'
+    });
+  }
+});
+
+// tickets
+router.get('/ticket/:code', requireAuth, async (req, res) => {
+  try {
+    const TicketRepository = (await import('../repositories/ticketRepository.js')).default;
+    const ticket = await TicketRepository.findByCode(req.params.code);
+    
+    if (!ticket) {
+      return res.status(404).render('error', { 
+        error: 'Ticket no encontrado',
+        user: req.user 
+      });
+    }
+
+    // Verificar que el ticket pertenece al usuario o es admin
+    if (req.user.role !== 'admin' && ticket.purchaser !== req.user.email) {
+      return res.status(403).render('error', { 
+        error: 'No tienes permiso para ver este ticket',
+        user: req.user 
+      });
+    }
+
+    res.render('ticket', {
+      title: 'Detalle de Compra',
+      style: 'index.css',
+      ticket: JSON.parse(JSON.stringify(ticket)),
+      user: req.user
+    });
+  } catch (error) {
+    res.status(500).render('error', { 
+      error: error.message,
+      user: req.user 
     });
   }
 });

@@ -1,16 +1,14 @@
 import { Ticket } from '../dao/models/ticketModel.js';
 
 class TicketRepository {
+  // Método para generar código único de ticket
+  generateCode() {
+    return `TICKET-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+  }
+
   async create(ticketData) {
     try {
-      // Generar código único para el ticket
-      const code = `TICKET-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-      
-      const ticket = new Ticket({
-        code,
-        ...ticketData
-      });
-      
+      const ticket = new Ticket(ticketData);
       await ticket.save();
       return ticket;
     } catch (error) {

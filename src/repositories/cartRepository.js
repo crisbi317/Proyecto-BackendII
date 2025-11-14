@@ -33,6 +33,22 @@ class CartRepository {
 
   async addProduct(cartId, productId) {
     try {
+      // Verificar stock del producto antes de agregar
+      const product = await this.productManager.getProductByID(productId);
+      
+      // Obtener el carrito para verificar cantidad actual
+      const cart = await this.cartManager.getProductsFromCartByID(cartId);
+      const existingProduct = cart.products.find(
+        item => item.product._id.toString() === productId
+      );
+      
+      const currentQuantity = existingProduct ? existingProduct.quantity : 0;
+      
+      // Verificar si hay stock disponible
+      if (product.stock <= currentQuantity) {
+        throw new Error(`No hay suficiente stock disponible. Stock actual: ${product.stock}, cantidad en carrito: ${currentQuantity}`);
+      }
+      
       return await this.cartManager.addProductByID(cartId, productId);
     } catch (error) {
       throw error;
@@ -57,6 +73,14 @@ class CartRepository {
 
   async updateProduct(cartId, productId, quantity) {
     try {
+      // Verificar stock del producto antes de actualizar
+      const product = await this.productManager.getProductByID(productId);
+      
+      // Verificar si la cantidad solicitada no excede el stock
+      if (quantity > product.stock) {
+        throw new Error(`No hay suficiente stock disponible. Stock actual: ${product.stock}, cantidad solicitada: ${quantity}`);
+      }
+      
       return await this.cartManager.updateProductByID(cartId, productId, quantity);
     } catch (error) {
       throw error;
@@ -69,6 +93,16 @@ class CartRepository {
     } catch (error) {
       throw error;
     }
+  }
+
+  // Alias para compatibilidad
+  async updateProducts(cartId, products) {
+    return this.updateAllProducts(cartId, products);
+  }
+
+  // Alias para compatibilidad
+  async clearCart(cartId) {
+    return this.deleteAllProducts(cartId);
   }
 }
 

@@ -33,6 +33,8 @@ const productSchema = mongoose.Schema({
         require: false,
         default: []
     }
+}, {
+    timestamps: true
 });
 
 productSchema.plugin(mongoosePaginate);

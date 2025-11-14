@@ -21,10 +21,23 @@ class UserRepository {
     }
   }
 
+  async getByEmail(email) {
+    return this.findByEmail(email);
+  }
+
   async findById(id) {
     try {
       const user = await User.findById(id).populate('cart');
       return user ? new UserDTO(user) : null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getById(id) {
+    try {
+      const user = await User.findById(id).populate('cart');
+      return user; // Return raw user, not DTO
     } catch (error) {
       throw error;
     }

@@ -24,7 +24,9 @@ mongoose.connect(config.MONGO_URI)
 //handlebars
 const hbs = create({
   helpers: {
-    eq: (a, b) => a === b
+    eq: (a, b) => a === b,
+    multiply: (a, b) => a * b,
+    json: (context) => JSON.stringify(context)
   },
   runtimeOptions: {
     allowProtoPropertiesByDefault: true,
