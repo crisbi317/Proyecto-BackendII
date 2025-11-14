@@ -17,7 +17,7 @@ class MailService {
     const mailOptions = {
       from: process.env.MAIL_USER,
       to: email,
-      subject: '🔐 Restablecer Contraseña - Acción Requerida',
+      subject: 'Restablecer Contraseña - Acción Requerida',
       html: `
         <!DOCTYPE html>
         <html>

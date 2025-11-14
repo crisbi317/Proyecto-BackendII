@@ -1,0 +1,85 @@
+<div class="not-found-container">
+  <div class="not-found-content">
+    <h1 class="error-code">404</h1>
+    <h2>Página No Encontrada</h2>
+    <p>Lo sentimos, la página que buscas no existe o ha sido movida.</p>
+    
+    <div class="not-found-actions">
+      <a href="/products" class="button primary">Ir a Productos</a>
+      <a href="/" class="button secondary">Volver al Inicio</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .not-found-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    padding: 20px;
+  }
+
+  .not-found-content {
+    text-align: center;
+    max-width: 600px;
+  }
+
+  .error-code {
+    font-size: 120px;
+    font-weight: bold;
+    color: #4CAF50;
+    margin: 0;
+    line-height: 1;
+  }
+
+  .not-found-content h2 {
+    font-size: 36px;
+    color: #333;
+    margin: 20px 0;
+  }
+
+  .not-found-content p {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 40px;
+  }
+
+  .not-found-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .button {
+    display: inline-block;
+    padding: 15px 30px;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+  }
+
+  .button.primary {
+    background: #4CAF50;
+    color: white;
+  }
+
+  .button.primary:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+  }
+
+  .button.secondary {
+    background: #2196F3;
+    color: white;
+  }
+
+  .button.secondary:hover {
+    background: #0b7dda;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+  }
+</style>

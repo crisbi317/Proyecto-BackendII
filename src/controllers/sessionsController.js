@@ -65,9 +65,20 @@ export const getCurrentUser = (req, res) => {
 //gestion de contraseña olvidada
 export const forgotPassword = async (req, res) => {
   try {
+    console.log('1. Iniciando forgotPassword con email:', req.body.email);
     const { email } = req.body;
     
+    if (!email) {
+      return res.status(400).json({ 
+        status: 'error',
+        message: 'El email es requerido' 
+      });
+    }
+
+    console.log('2. Buscando usuario con email:', email);
     const user = await UserRepository.getByEmail(email);
+    console.log('3. Usuario encontrado:', user ? 'Sí' : 'No');
+    
     if (!user) {
       return res.status(404).json({ 
         status: 'error',
@@ -76,9 +87,11 @@ export const forgotPassword = async (req, res) => {
     }
 
     // Crear token único
+    console.log('4. Generando token...');
     const resetToken = crypto.randomBytes(32).toString('hex');
     
     // Guardar token con email y expiración de 1 hora
+    console.log('5. Guardando token en BD...');
     await PasswordResetToken.create({
       email: email,
       token: resetToken,
@@ -86,7 +99,14 @@ export const forgotPassword = async (req, res) => {
     });
 
     // Enviar email recuperación
-    await MailService.sendPasswordResetEmail(email, resetToken);
+    console.log('6. Enviando email...');
+    try {
+      await MailService.sendPasswordResetEmail(email, resetToken);
+      console.log('7. Email enviado exitosamente');
+    } catch (emailError) {
+      console.log('Error al enviar email, pero continuando con el proceso');
+      console.log('Link de recuperación:', `${process.env.BASE_URL}/reset-password/${resetToken}`);
+    }
 
     res.json({ 
       status: 'success',
@@ -94,9 +114,10 @@ export const forgotPassword = async (req, res) => {
     });
   } catch (error) {
     console.error('Error in forgotPassword:', error);
+    console.error('Stack trace:', error.stack);
     res.status(500).json({ 
       status: 'error',
-      message: 'Error al procesar la solicitud' 
+      message: 'Error al procesar la solicitud: ' + error.message 
     });
   }
 };

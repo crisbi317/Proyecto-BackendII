@@ -1,13 +1,9 @@
 <div class="auth-container">
   <h2>Iniciar Sesión</h2>
 
-  {{
-#if
- error}}
+  {{#if error}}
     <div class="errorMensaje">{{error}}</div>
-  {{
-/if
-}}
+  {{/if}}
 
   <form action="/api/sessions/login" method="POST">
     <div class="formulario">

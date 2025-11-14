@@ -13,7 +13,20 @@
           <p><strong>Categoría:</strong> {{this.product.category}}</p>
           <p><strong>Precio unitario:</strong> ${{this.product.price}}</p>
           <p><strong>Stock disponible:</strong> {{this.product.stock}}</p>
-          <p><strong>Cantidad en carrito:</strong> {{this.quantity}}</p>
+          
+          <div class="quantity-controls">
+            <label><strong>Cantidad:</strong></label>
+            <div class="quantity-buttons">
+              <button class="button-quantity" onclick="decreaseQuantity('{{this.product._id}}', {{this.quantity}})">
+                ➖
+              </button>
+              <span class="quantity-display">{{this.quantity}}</span>
+              <button class="button-quantity" onclick="increaseQuantity('{{this.product._id}}', {{this.quantity}}, {{this.product.stock}})">
+                ➕
+              </button>
+            </div>
+          </div>
+          
           <p><strong>Subtotal:</strong> ${{multiply this.product.price this.quantity}}</p>
           <button class="button-delete" onclick="removeFromCart('{{this.product._id}}')">
             🗑️ Eliminar
@@ -79,6 +92,66 @@
   .product-card p {
     margin: 8px 0;
     color: #666;
+  }
+
+  .quantity-controls {
+    margin: 15px 0;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+  }
+
+  .quantity-controls label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+  }
+
+  .quantity-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  .button-quantity {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .button-quantity:hover {
+    background-color: #0056b3;
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+  }
+
+  .button-quantity:active {
+    transform: scale(0.95);
+  }
+
+  .button-quantity:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .quantity-display {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    min-width: 30px;
+    text-align: center;
   }
 
   .button-delete {
@@ -232,7 +305,7 @@
 <script>
   const cartId = '{{cartId}}';
 
-    document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function() {
     calculateTotal();
   });
 
@@ -245,6 +318,54 @@
     });
     
     document.getElementById('cartTotal').textContent = total.toFixed(2);
+  }
+
+  async function increaseQuantity(productId, currentQuantity, stock) {
+    // Verificar si hay stock disponible
+    if (currentQuantity >= stock) {
+      showModal('Stock Insuficiente', '<p class="error-message">No hay más unidades disponibles de este producto.</p>');
+      return;
+    }
+
+    const newQuantity = currentQuantity + 1;
+    await updateProductQuantity(productId, newQuantity);
+  }
+
+  async function decreaseQuantity(productId, currentQuantity) {
+    if (currentQuantity <= 1) {
+      // Si la cantidad es 1, preguntar si desea eliminar
+      if (confirm('La cantidad es 1. ¿Deseas eliminar el producto del carrito?')) {
+        await removeFromCart(productId);
+      }
+      return;
+    }
+
+    const newQuantity = currentQuantity - 1;
+    await updateProductQuantity(productId, newQuantity);
+  }
+
+  async function updateProductQuantity(productId, newQuantity) {
+    try {
+      const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ quantity: newQuantity })
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        // Recargar la página para mostrar los cambios
+        location.reload();
+      } else {
+        showModal('Error', `<p class="error-message">${data.message}</p>`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showModal('Error', '<p class="error-message">Error al actualizar la cantidad.</p>');
+    }
   }
 
   async function removeFromCart(productId) {
@@ -352,7 +473,7 @@
 
     if (data.productsNotProcessed && data.productsNotProcessed.length > 0) {
       html += '<div class="products-not-processed">';
-      html += '<h3> Productos sin stock suficiente:</h3><ul>';
+      html += '<h3>⚠️ Productos sin stock suficiente:</h3><ul>';
       data.productsNotProcessed.forEach(p => {
         html += `<li>${p.title} - Solicitados: ${p.requestedQuantity}, Disponibles: ${p.availableStock}</li>`;
       });

@@ -76,9 +76,18 @@ export const purchaseCart = async (req, res) => {
 
     const ticket = await TicketRepository.create(ticketData);
 
-    // Actualizar stock de productos procesados
-    for (const item of productsToProcess) {
-      await ProductRepository.updateStock(item.product, item.quantity);
+    // El stock ya fue reducido al agregar productos al carrito
+    // No es necesario volver a reducirlo aquí
+    
+    // Si hay productos que no se pudieron procesar, devolver su stock al inventario
+    for (const item of productsNotProcessed) {
+      const cartItem = cart.products.find(p => p.product._id.toString() === item.product.toString());
+      if (cartItem) {
+        const product = await ProductRepository.getById(item.product);
+        await ProductRepository.update(item.product, { 
+          stock: product.stock + cartItem.quantity 
+        });
+      }
     }
 
     
@@ -89,12 +98,17 @@ export const purchaseCart = async (req, res) => {
     if (remainingProducts.length > 0) {
         await CartRepository.updateProducts(cid, remainingProducts);
     } else {
-        await CartRepository.clearCart(cid);
+        // No devolver stock al vaciar el carrito después de compra exitosa
+        await CartRepository.clearCart(cid, false);
     }
 
-    // Enviar email de confirmación
-    MailService.sendPurchaseConfirmation(purchaserEmail, ticket)
-      .catch(err => console.error('Error sending email:', err));
+    // Enviar email de confirmación (no bloquea la compra si falla)
+    try {
+      await MailService.sendPurchaseConfirmation(purchaserEmail, ticket);
+    } catch (emailError) {
+      console.error('Error al enviar email de confirmación:', emailError.message);
+      // No lanzar error, continuar con la compra
+    }
 
     res.json({ 
       status: 'success',

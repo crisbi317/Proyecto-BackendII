@@ -44,9 +44,15 @@
   </div>
 
   <div class="ticket-actions">
-    <a href="/products" class="button">Seguir Comprando</a>
-    <a href="/profile" class="button">Mi Perfil</a>
-    <button onclick="window.print()" class="button print-button">Imprimir Ticket</button>
+    <a href="/products" class="button" style="display: inline-block; padding: 12px 24px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
+      Seguir Comprando
+    </a>
+    <a href="/profile" class="button" style="display: inline-block; padding: 12px 24px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
+      Mi Perfil
+    </a>
+    <button onclick="window.print()" class="button print-button" style="padding: 12px 24px; background: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer;">
+      Imprimir Ticket
+    </button>
   </div>
 </div>
 
@@ -139,7 +145,9 @@
     text-align: left;
     border-bottom: 1px solid #ddd;
   }
-
+  td{
+    color: #333;
+  }
   th {
     font-weight: bold;
   }

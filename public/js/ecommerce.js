@@ -1,31 +1,19 @@
-// Obtener cartId del elemento HTML (si el usuario está autenticado)
+// Obtener cartId del elemento HTML
 const userCartId = document.querySelector('#user-cart-id')?.value;
 
 showButtonCart();
 
 async function addToCart(pid) {
-    // Priorizar el carrito del usuario autenticado
-    let cartId = userCartId || localStorage.getItem('cartId');
-
-    if (!cartId) {
-        const createCartResponse = await fetch('/api/carts', {
-            method: 'POST'
-        });
-
-        const createCart = await createCartResponse.json();
-
-        if (createCart.status === 'error') {
-            return alert(createCart.message);
+ 
+    if (!userCartId) {
+   
+        if (confirm('Debes iniciar sesión para agregar productos al carrito. ¿Deseas ir al login?')) {
+            window.location.href = '/login';
         }
-
-        console.log(createCart);
-
-        cartId = createCart.payload._id;
-        // Solo guardar en localStorage si no es usuario autenticado
-        if (!userCartId) {
-            localStorage.setItem('cartId', cartId);
-        }
+        return;
     }
+
+    let cartId = userCartId;
 
     const addProductResponse = await fetch(`/api/carts/${cartId}/product/${pid}`, {
         method: 'POST'
@@ -49,11 +37,12 @@ async function addToCart(pid) {
 }
 
 function showButtonCart() {
-    // Priorizar el carrito del usuario autenticado
-    const cartId = userCartId || localStorage.getItem('cartId');
-
-    if (cartId) {
-        document.querySelector('#button-cart').setAttribute("href", `/cart/${cartId}`);
+    
+    if (userCartId) {
+        document.querySelector('#button-cart').setAttribute("href", `/cart/${userCartId}`);
         document.querySelector('.view-cart').style.display = "block";
-    }  
+    } else {
+        
+        document.querySelector('.view-cart').style.display = "none";
+    }
 }

@@ -35,7 +35,7 @@ const hbs = create({
 });
 
 app.engine('handlebars', hbs.engine);
-app.set('views', __dirname + '/../views');
+app.set('views', __dirname + '/../../views');
 app.set('view engine', 'handlebars');
 
 //midlewares

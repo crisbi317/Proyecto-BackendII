@@ -1,4 +1,5 @@
 import User from '../dao/models/User.js';
+import { cartModel } from '../dao/models/cartModel.js';
 import UserDTO from '../dto/userDTO.js';
 
 class UserRepository {
@@ -37,7 +38,7 @@ class UserRepository {
   async getById(id) {
     try {
       const user = await User.findById(id).populate('cart');
-      return user; // Return raw user, not DTO
+      return user; 
     } catch (error) {
       throw error;
     }
